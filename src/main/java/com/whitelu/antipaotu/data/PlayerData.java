@@ -30,8 +30,13 @@ public class PlayerData {
     private final List<DetectionRecord> detectionHistory;
     
 
+    // 鞘翅状态
     private volatile boolean isGliding;
     private volatile LocalDateTime glidingStartTime;
+    
+    // 维度切换冷却状态
+    private volatile LocalDateTime lastDimensionSwitchTime;
+    private volatile boolean isInDimensionSwitchCooldown;
     
     public PlayerData(UUID playerId, String playerName) {
         this.playerId = playerId;
@@ -41,6 +46,7 @@ public class PlayerData {
         this.detectionHistory = new ArrayList<>();
         this.isInCooldown = false;
         this.isGliding = false;
+        this.isInDimensionSwitchCooldown = false;
     }
     
     /**
@@ -199,6 +205,46 @@ public class PlayerData {
     
     public LocalDateTime getGlidingStartTime() {
         return glidingStartTime;
+    }
+    
+    /**
+     * 设置维度切换冷却状态
+     */
+    public void setDimensionSwitchCooldown() {
+        this.lastDimensionSwitchTime = LocalDateTime.now();
+        this.isInDimensionSwitchCooldown = true;
+    }
+    
+    /**
+     * 检查是否在维度切换冷却期间
+     */
+    public boolean isInDimensionSwitchCooldown(int cooldownSeconds) {
+        if (!isInDimensionSwitchCooldown || lastDimensionSwitchTime == null) {
+            return false;
+        }
+        
+        LocalDateTime cooldownEnd = lastDimensionSwitchTime.plusSeconds(cooldownSeconds);
+        boolean stillInCooldown = LocalDateTime.now().isBefore(cooldownEnd);
+        
+        if (!stillInCooldown) {
+            this.isInDimensionSwitchCooldown = false;
+        }
+        
+        return stillInCooldown;
+    }
+    
+    /**
+     * 获取上次维度切换时间
+     */
+    public LocalDateTime getLastDimensionSwitchTime() {
+        return lastDimensionSwitchTime;
+    }
+    
+    /**
+     * 检查是否在维度切换冷却状态
+     */
+    public boolean isInDimensionSwitchCooldown() {
+        return isInDimensionSwitchCooldown;
     }
     
     /**

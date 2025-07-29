@@ -14,6 +14,12 @@ detection:
   
   # 连续检测次数阈值（达到此次数后封禁玩家）
   continuous-threshold: 5
+  
+  # 玩家在水中时是否禁用检测（默认true，类似鞘翅不飞行时的处理）
+  disable-detection-in-water: true
+  
+  # 维度切换后的冷却时间（秒）- 切换到主世界/末地/地狱后多久内不进行检测通知和封禁
+  dimension-switch-cooldown-seconds: 30
 
 # 封禁配置
 ban:

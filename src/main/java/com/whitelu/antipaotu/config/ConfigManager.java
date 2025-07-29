@@ -27,6 +27,9 @@ public class ConfigManager {
     private boolean debugEnabled;
     private boolean debugVerbose;
     
+    // 新增配置项
+    private boolean disableDetectionInWater;
+    private int dimensionSwitchCooldownSeconds;
 
     private boolean oneBotEnabled;
     private String oneBotWebSocketUrl;
@@ -99,6 +102,9 @@ public class ConfigManager {
         this.debugEnabled = config.getBoolean("debug.enabled", false);
         this.debugVerbose = config.getBoolean("debug.verbose", false);
         
+        // 新增配置项
+        this.disableDetectionInWater = config.getBoolean("detection.disable-detection-in-water", true);
+        this.dimensionSwitchCooldownSeconds = config.getInt("detection.dimension-switch-cooldown-seconds", 30);
 
         this.oneBotEnabled = config.getBoolean("onebot.enabled", false);
         this.oneBotWebSocketUrl = config.getString("onebot.websocket-url", "ws://localhost:6700");
@@ -275,6 +281,14 @@ public class ConfigManager {
     
     public boolean isDebugVerbose() {
         return debugVerbose;
+    }
+    
+    public boolean isDisableDetectionInWater() {
+        return disableDetectionInWater;
+    }
+
+    public int getDimensionSwitchCooldownSeconds() {
+        return dimensionSwitchCooldownSeconds;
     }
     
     public FileConfiguration getConfig() {

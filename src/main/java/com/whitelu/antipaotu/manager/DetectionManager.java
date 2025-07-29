@@ -4,6 +4,7 @@ import com.whitelu.antipaotu.AntiPaotuPlugin;
 import com.whitelu.antipaotu.data.ChunkData;
 import com.whitelu.antipaotu.data.PlayerData;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 import java.time.LocalDateTime;
@@ -118,20 +119,42 @@ public class DetectionManager {
         int timeWindow = plugin.getConfigManager().getTimeWindow();
         int chunkCount = playerData.getCurrentWindowChunkCount();
         
-
+        // 如果没有区块生成，直接返回
         if (chunkCount == 0) {
             return;
         }
         
-
+        // 获取玩家实例
         Player player = Bukkit.getPlayer(playerData.getPlayerId());
         if (player == null) {
             return;
         }
         
-
+        // 检查玩家是否在维度切换冷却期内
+        if (playerData.isInDimensionSwitchCooldown(plugin.getConfigManager().getDimensionSwitchCooldownSeconds())) {
+            if (plugin.getConfigManager().isDebugVerbose()) {
+                plugin.getLogger().info("玩家 " + playerData.getPlayerName() + 
+                                      " 在维度切换冷却期内，跳过检测和通知");
+            }
+            return;
+        }
+        
+        // 检查玩家是否在水中（如果启用了此功能）
+        if (plugin.getConfigManager().isDisableDetectionInWater() && isPlayerInWater(player)) {
+            // 如果玩家在水中，重置连续计数（类似鞘翅不飞行的处理）
+            if (playerData.getContinuousCount() > 0) {
+                playerData.resetContinuousCount();
+                if (plugin.getConfigManager().isDebugEnabled()) {
+                    plugin.getLogger().info("玩家 " + playerData.getPlayerName() + 
+                                          " 在水中，连续计数已重置");
+                }
+            }
+            return;
+        }
+        
+        // 检查鞘翅状态
         if (!player.isGliding()) {
-
+            // 如果不在使用鞘翅，重置连续计数
             if (playerData.getContinuousCount() > 0) {
                 playerData.resetContinuousCount();
                 if (plugin.getConfigManager().isDebugEnabled()) {
@@ -146,10 +169,10 @@ public class DetectionManager {
         int expectedChunks = (2 * viewDistance + 1) * 5; // n=(2v+1)×5
         
         if (chunkCount >= expectedChunks) {
-
+            // 触发检测
             triggerDetection(playerData, timeWindow, chunkCount);
         } else {
-
+            // 如果在冷却期后未再次触发阈值，重置连续计数
             if (playerData.getContinuousCount() > 0 && playerData.getLastDetectionTime() != null) {
                 playerData.resetContinuousCount();
                 if (plugin.getConfigManager().isDebugEnabled()) {
@@ -171,21 +194,35 @@ public class DetectionManager {
         playerData.triggerDetection();
         int continuousCount = playerData.getContinuousCount();
         
-
+        // 设置冷却状态
         playerData.setCooldown(true);
         
-
-        sendDetectionNotifications(playerData, timeWindow, chunkCount, continuousCount);
+        // 检查是否在维度切换冷却期内
+        boolean inDimensionCooldown = playerData.isInDimensionSwitchCooldown(
+            plugin.getConfigManager().getDimensionSwitchCooldownSeconds());
         
-
-        if (continuousCount >= plugin.getConfigManager().getContinuousThreshold()) {
-            plugin.getBanManager().banPlayer(playerData.getPlayerId(), playerData.getPlayerName());
-            sendBanNotifications(playerData);
+        // 只有不在维度切换冷却期内才发送通知和进行封禁
+        if (!inDimensionCooldown) {
+            // 发送检测通知
+            sendDetectionNotifications(playerData, timeWindow, chunkCount, continuousCount);
+            
+            // 检查是否达到封禁阈值
+            if (continuousCount >= plugin.getConfigManager().getContinuousThreshold()) {
+                plugin.getBanManager().banPlayer(playerData.getPlayerId(), playerData.getPlayerName());
+                sendBanNotifications(playerData);
+            }
+        } else {
+            // 在维度切换冷却期内，只记录到调试日志
+            if (plugin.getConfigManager().isDebugEnabled()) {
+                plugin.getLogger().info("玩家 " + playerData.getPlayerName() + 
+                                      " 在维度切换冷却期内触发检测，但不发送通知和封禁。连续次数: " + continuousCount);
+            }
         }
         
         if (plugin.getConfigManager().isDebugEnabled()) {
             plugin.getLogger().info("玩家 " + playerData.getPlayerName() + 
-                                  " 触发检测，连续次数: " + continuousCount);
+                                  " 触发检测，连续次数: " + continuousCount + 
+                                  (inDimensionCooldown ? " (维度冷却期)" : ""));
         }
     }
     
@@ -336,5 +373,22 @@ public class DetectionManager {
     public void cleanup() {
         stopDetectionTask();
         playerDataMap.clear();
+    }
+
+    /**
+     * 检查玩家是否在水中
+     * 
+     * @param player 玩家
+     * @return 是否在水中
+     */
+    private boolean isPlayerInWater(Player player) {
+        // 检查玩家脚部位置的方块
+        Material footBlock = player.getLocation().getBlock().getType();
+        
+        // 检查玩家眼部位置的方块
+        Material eyeBlock = player.getEyeLocation().getBlock().getType();
+        
+        // 如果脚部或眼部任一位置在水中，就认为玩家在水中
+        return footBlock == Material.WATER || eyeBlock == Material.WATER;
     }
 } 

@@ -3,6 +3,7 @@ package com.whitelu.antipaotu;
 import com.whitelu.antipaotu.config.ConfigManager;
 import com.whitelu.antipaotu.listener.PlayerJoinListener;
 import com.whitelu.antipaotu.listener.PlayerMoveListener;
+import com.whitelu.antipaotu.listener.PlayerTeleportListener;
 import com.whitelu.antipaotu.manager.BanManager;
 import com.whitelu.antipaotu.manager.ChunkTracker;
 import com.whitelu.antipaotu.manager.DetectionManager;
@@ -42,6 +43,7 @@ public class AntiPaotuPlugin extends JavaPlugin implements TabCompleter {
 
     private PlayerMoveListener playerMoveListener;
     private PlayerJoinListener playerJoinListener;
+    private PlayerTeleportListener playerTeleportListener;
     
     @Override
     public void onEnable() {
@@ -102,9 +104,11 @@ public class AntiPaotuPlugin extends JavaPlugin implements TabCompleter {
     private void registerListeners() {
         this.playerMoveListener = new PlayerMoveListener(this);
         this.playerJoinListener = new PlayerJoinListener(this);
+        this.playerTeleportListener = new PlayerTeleportListener(this);
         
         Bukkit.getPluginManager().registerEvents(playerMoveListener, this);
         Bukkit.getPluginManager().registerEvents(playerJoinListener, this);
+        Bukkit.getPluginManager().registerEvents(playerTeleportListener, this);
     }
     
     @Override
