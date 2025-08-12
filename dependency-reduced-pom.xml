@@ -4,7 +4,7 @@
   <groupId>com.whitelu</groupId>
   <artifactId>anti-paotu</artifactId>
   <name>Anti-Paotu</name>
-  <version>1.0.0</version>
+  <version>1.2</version>
   <description>When a player's running map is detected, send a notification</description>
   <build>
     <resources>

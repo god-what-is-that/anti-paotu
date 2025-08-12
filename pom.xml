@@ -7,7 +7,7 @@
 
     <groupId>com.whitelu</groupId>
     <artifactId>anti-paotu</artifactId>
-    <version>1.1</version>
+    <version>1.2</version>
     <packaging>jar</packaging>
 
     <name>Anti-Paotu</name>
