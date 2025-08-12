@@ -6,6 +6,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Random;
 
 /**
  * 配置管理器类
@@ -354,12 +355,32 @@ public class ConfigManager {
     
     /**
      * 获取OneBot消息模板
+     * 支持从列表中随机选择消息，同时保持向下兼容性
      * 
      * @param messageType 消息类型
      * @param defaultValue 默认值
      * @return 消息模板
      */
     public String getOneBotMessage(String messageType, String defaultValue) {
-        return config.getString("onebot.messages." + messageType, defaultValue);
+        String configPath = "onebot.messages." + messageType;
+        
+        // 检查配置中是否为列表格式
+        if (config.isList(configPath)) {
+            List<String> messageList = config.getStringList(configPath);
+            if (messageList != null && !messageList.isEmpty()) {
+                // 从列表中随机选择一个消息
+                Random random = new Random();
+                return messageList.get(random.nextInt(messageList.size()));
+            }
+        }
+        
+        // 向下兼容：如果不是列表格式，尝试作为字符串读取
+        String singleMessage = config.getString(configPath);
+        if (singleMessage != null && !singleMessage.isEmpty()) {
+            return singleMessage;
+        }
+        
+        // 如果都没有找到，返回默认值
+        return defaultValue;
     }
 } 

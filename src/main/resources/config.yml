@@ -95,5 +95,7 @@ onebot:
   
   # QQ消息模板
   messages:
-    detection: "已检测到玩家%player%触发跑图阈值，在%time%秒内生成了%chunks%个区块，连续次数%count%"
-    ban: "由于多次触发跑图阈值，玩家%player%被暂时禁止进入服务器" 
+    detection: 
+      - "已检测到玩家%player%触发跑图阈值，在%time%秒内生成了%chunks%个区块，连续次数%count%"
+    ban: 
+      - "由于多次触发跑图阈值，玩家%player%被暂时禁止进入服务器"
