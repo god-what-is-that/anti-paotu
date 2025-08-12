@@ -363,8 +363,7 @@ public class ConfigManager {
      */
     public String getOneBotMessage(String messageType, String defaultValue) {
         String configPath = "onebot.messages." + messageType;
-        
-        // 检查配置中是否为列表格式
+
         if (config.isList(configPath)) {
             List<String> messageList = config.getStringList(configPath);
             if (messageList != null && !messageList.isEmpty()) {
@@ -373,14 +372,12 @@ public class ConfigManager {
                 return messageList.get(random.nextInt(messageList.size()));
             }
         }
-        
-        // 向下兼容：如果不是列表格式，尝试作为字符串读取
+
         String singleMessage = config.getString(configPath);
         if (singleMessage != null && !singleMessage.isEmpty()) {
             return singleMessage;
         }
         
-        // 如果都没有找到，返回默认值
         return defaultValue;
     }
 } 

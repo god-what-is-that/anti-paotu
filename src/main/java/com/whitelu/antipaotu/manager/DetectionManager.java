@@ -377,18 +377,21 @@ public class DetectionManager {
 
     /**
      * 检查玩家是否在水中
+     * 使用多种方法检测水中状态，提高准确性
      * 
      * @param player 玩家
      * @return 是否在水中
      */
     private boolean isPlayerInWater(Player player) {
-        // 检查玩家脚部位置的方块
+        if (player.isSwimming()) {
+            return true;
+        }
+        
         Material footBlock = player.getLocation().getBlock().getType();
         
-        // 检查玩家眼部位置的方块
         Material eyeBlock = player.getEyeLocation().getBlock().getType();
         
-        // 如果脚部或眼部任一位置在水中，就认为玩家在水中
-        return footBlock == Material.WATER || eyeBlock == Material.WATER;
+        boolean inWater = player.isInWater();
+        return footBlock == Material.WATER || eyeBlock == Material.WATER || inWater;
     }
 } 

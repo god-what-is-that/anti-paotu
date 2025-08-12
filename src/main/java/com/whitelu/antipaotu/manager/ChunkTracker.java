@@ -5,6 +5,7 @@ import com.whitelu.antipaotu.data.ChunkData;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -70,6 +71,14 @@ public class ChunkTracker implements Listener {
             return;
         }
         
+        // 检查玩家是否在水中（如果启用了此功能）
+        if (plugin.getConfigManager().isDisableDetectionInWater() && isPlayerInWater(triggerPlayer)) {
+            if (plugin.getConfigManager().isDebugVerbose()) {
+                plugin.getLogger().info("玩家 " + triggerPlayer.getName() + 
+                                      " 在水中使用鞘翅，忽略区块生成检测");
+            }
+            return;
+        }
 
         if (plugin.getConfigManager().isHeightFilterEnabled()) {
             int heightThreshold = plugin.getConfigManager().getHeightThreshold();
@@ -228,5 +237,22 @@ public class ChunkTracker implements Listener {
      */
     public int getTrackedChunkCount() {
         return recentChunks.size();
+    }
+
+    /**
+     * 检查玩家是否在水中
+     * 使用多种方法检测水中状态，提高准确性
+     * 
+     * @param player 玩家
+     * @return 是否在水中
+     */
+    private boolean isPlayerInWater(Player player) {
+        if (player.isSwimming()) {
+            return true;
+        }
+        Material footBlock = player.getLocation().getBlock().getType();
+        Material eyeBlock = player.getEyeLocation().getBlock().getType();
+        boolean inWater = player.isInWater();
+        return footBlock == Material.WATER || eyeBlock == Material.WATER || inWater;
     }
 } 
